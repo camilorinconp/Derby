@@ -1,789 +1,491 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Propuesta de Transformación Digital para Nobsa</title>
+    <title>Panel Interactivo: Mercado Laboral Tecnológico en Derby</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <!-- Chosen Palette: Calm Harmony with Modern Accents -->
-    <!-- Application Structure Plan: The SPA is structured into four logical, scrollable sections for intuitive exploration: 1) A 'Hero' section summarizing the vision with a dynamic background. 2) A 'Diagnosis' section using interactive, elevated cards to present the current digital state. 3) A core 'Roadmap' section with clickable tabs for each phase (Short, Medium, Long Term) on desktop, transforming into an accordion with sleek transitions on mobile, dynamically displaying objectives, technologies, and use cases. This is the main interactive hub. 4) An 'Impact' section with a dynamic bar chart visualizing the projected social, economic, and administrative benefits, styled for clarity. This structure transforms the linear report into a user-driven dashboard, allowing stakeholders to grasp the big picture and then drill down into specific phases, making the complex proposal digestible and engaging with a modern aesthetic. -->
-    <!-- Visualization & Content Choices: 
-        - Report Info: Executive Summary -> Goal: Inform/Inspire -> Viz: Hero section with key stats, animated gradient text, and subtle background pattern -> Interaction: None -> Justification: Creates a strong, modern first impression. -> Library/Method: HTML/Tailwind/CSS.
-        - Report Info: Diagnosis Data (Presence, Tech, Connectivity) -> Goal: Organize/Inform -> Viz: Elevated, icon-driven cards with enhanced hover effects -> Interaction: Hover effects -> Justification: Visually appealing and quickly conveys current state without overwhelming detail. -> Library/Method: HTML/Tailwind.
-        - Report Info: Phased Implementation Plan -> Goal: Organize/Compare -> Viz: Interactive Tabbed Timeline (desktop) with smooth transitions / Accordion (mobile) with animated expand/collapse -> Interaction: Click to reveal phase details -> Justification: Tabs are efficient for desktop, while an accordion is superior for mobile to prevent overflow and provide a clear vertical flow, both with modern animations. -> Library/Method: HTML/Tailwind/JS.
-        - Report Info: Impact Indicators (% changes) -> Goal: Compare/Inform -> Viz: Grouped Bar Chart with refined colors and clear labels -> Interaction: Tooltips on hover -> Justification: A bar chart is superior to multiple pie charts for comparing different metrics across categories (Social, Economic, Admin), presented cleanly. -> Library/Method: Chart.js/Canvas.
-        - Report Info: Value Proposition -> Goal: Inform -> Viz: Multi-column list with vibrant icons and clear descriptions -> Interaction: None -> Justification: Clear, scannable summary of key benefits, visually enhanced. -> Library/Method: HTML/Tailwind.
-    -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Dark & Vibrant (Slate-950, Teal-500, Sky-400, Amber-400) -->
+    <!-- Application Structure Plan: He diseñado esta aplicación como un panel de control temático de una sola página. En lugar de seguir la estructura lineal del informe, he agrupado la información en cuatro secciones lógicas y navegables: Panorama, Demanda Laboral, Salarios y Futuro. Este enfoque permite a los usuarios (como buscadores de empleo, reclutadores o analistas) acceder directamente a la información que más les interesa a través de una barra de navegación fija. La interactividad se centra en filtros y gráficos dinámicos para que la exploración de datos sea intuitiva y atractiva, transformando la lectura pasiva en un descubrimiento activo. El nuevo diseño aplica un tema oscuro moderno y un menú de navegación de hamburguesa para una mejor experiencia móvil. -->
+    <!-- Visualization & Content Choices: He seleccionado visualizaciones para cada tipo de dato con el objetivo de maximizar la claridad y la interacción. Para comparar la demanda de roles, un gráfico de barras con filtros por experiencia (Chart.js) es más efectivo que una tabla estática. Para mostrar proporciones como las modalidades de trabajo, un gráfico de dona (Chart.js) es universalmente comprendido. Los salarios se comparan con un gráfico de barras horizontal, fácil de leer. Las proyecciones y la información cualitativa se presentan en tarjetas (HTML/Tailwind) con un efecto de "glassmorphism" para una mejor legibilidad y un toque moderno. Todas las elecciones evitan SVG y Mermaid, centrándose en Canvas para los gráficos y HTML/CSS para los diagramas, asegurando una experiencia interactiva y coherente. -->
     <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #F0F4F8; /* Light blue-gray background */
-            color: #2C3E50; /* Darker text for contrast */
-            line-height: 1.6;
+            background-color: #0c0a09;
+            background-image: radial-gradient(at 0% 0%, #164e63 0%, transparent 50%), radial-gradient(at 100% 100%, #155e75 0%, transparent 50%);
         }
-        .header-shadow {
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* More prominent header shadow */
-        }
-        .section-title {
-            font-size: 2.8rem; /* Larger title */
-            font-weight: 900; /* Bolder */
-            color: #2C3E50;
-            text-align: center;
-            margin-bottom: 1.8rem; /* More spacing below */
-            letter-spacing: -0.03em; /* Tighter spacing */
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.05); /* Subtle text shadow */
-        }
-        .section-subtitle {
-            font-size: 1.35rem; /* Slightly larger subtitle */
-            color: #607D8B; /* Softer gray */
-            text-align: center;
-            max-width: 900px; /* Wider for better readability */
-            margin: 0 auto 4.5rem auto; /* More spacing below */
-        }
-        .card {
-            background-color: #FFFFFF;
-            border-radius: 1.25rem; /* Even more rounded corners */
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1), 0 5px 15px rgba(0, 0, 0, 0.05); /* Deeper, multi-layered shadow */
-            transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); /* Smoother transition */
-            border: 1px solid rgba(0, 0, 0, 0.08); /* Slightly more visible subtle border */
-        }
-        .card:hover {
-            transform: translateY(-10px); /* More pronounced lift */
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15), 0 10px 20px rgba(0, 0, 0, 0.08); /* Even deeper shadow on hover */
-        }
-        
-        /* Hero section specific styles */
-        .hero-bg {
-            background: linear-gradient(135deg, #2B6CB0 0%, #38A169 100%); /* Deeper, more sophisticated gradient */
+        .chart-container {
             position: relative;
-            overflow: hidden;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px;
+            max-height: 400px;
         }
-        .hero-bg::before {
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .section-title::after {
             content: '';
-            position: absolute;
+            display: block;
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, #14b8a6, #22d3ee);
+            margin-top: 8px;
+        }
+        .glass-card {
+            background-color: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .mobile-menu-overlay {
+            position: fixed;
             top: 0;
             left: 0;
             width: 100%;
-            height: 100%;
-            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.08' fill-rule='evenodd'%3E%3Cpath d='M0 60V0h60v60H0zm5-10V10h50v50H5zm10-10V20h40v40H15zm10-10V30h30v30H25zm10-10V40h20v20H35zm10-10V50h10v10H45z'/%3E%3C/g%3E%3C/svg%3E"); /* Subtle geometric pattern with lower opacity */
-            opacity: 0.15; /* Slightly more visible pattern */
-            z-index: 0;
+            height: 100vh;
+            background-color: rgba(12, 10, 9, 0.95);
+            z-index: 40;
+            transition: transform 0.3s ease-out;
+            transform: translateX(100%);
         }
-        .hero-content {
-            position: relative;
-            z-index: 1;
+        .mobile-menu-overlay.open {
+            transform: translateX(0);
         }
-        .gradient-text {
-            background-image: linear-gradient(45deg, #A7D9FF, #C6F6D5); /* Lighter, more ethereal gradient for text */
+        .mobile-menu-link {
+            background-image: linear-gradient(to right, #14b8a6, #14b8a6 50%, #fff 50%);
+            background-size: 200% 100%;
+            background-position: -100%;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-        }
-
-        /* Buttons */
-        .primary-button {
-            background-color: #0D6EFD;
-            color: white;
-            padding: 1rem 3rem; /* More padding */
-            border-radius: 9999px; /* Fully rounded */
-            font-weight: 700; /* Bolder */
-            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); /* Smoother transition */
-            box-shadow: 0 8px 20px rgba(13, 110, 253, 0.4); /* More pronounced shadow */
-        }
-        .primary-button:hover {
-            background-color: #0B5ED7;
-            box-shadow: 0 12px 25px rgba(13, 110, 253, 0.5);
-            transform: translateY(-3px); /* More pronounced lift */
-        }
-
-        /* Tabs (Desktop) */
-        .tab-btn {
-            padding: 1.2rem 1.8rem; /* More padding */
-            border-bottom: 4px solid transparent; /* Thicker border */
+            transition: all 0.3s ease-in-out;
             font-weight: 600;
-            color: #607D8B;
-            transition: all 0.3s ease;
-            border-radius: 0.75rem 0.75rem 0 0; /* More rounded top corners */
         }
-        .tab-btn:hover {
-            color: #0D6EFD;
-            border-color: #89CFF0; /* Lighter blue on hover */
-        }
-        .tab-active {
-            border-color: #0D6EFD;
-            color: #0D6EFD;
-            background-color: #EBF2F7; /* Subtle background for active tab */
-            font-weight: 700;
-            box-shadow: 0 -2px 8px rgba(0,0,0,0.05); /* Subtle shadow on active tab */
-        }
-        .tab-content-wrapper {
-            background-color: #FFFFFF;
-            border-radius: 1rem;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08); /* Refined shadow */
-            padding: 3rem; /* More padding */
-        }
-
-        /* Accordion (Mobile) */
-        .accordion-header {
-            background-color: #EBF2F7; /* Lighter background for header */
-            padding: 1.4rem 1.8rem; /* More padding */
-            border-radius: 1rem; /* More rounded */
-            margin-bottom: 0.8rem; /* More spacing */
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-weight: 700;
-            color: #2C3E50;
-            transition: background-color 0.3s ease, box-shadow 0.3s ease;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* More refined shadow */
-        }
-        .accordion-header:hover {
-            background-color: #DDE7F0; /* Slightly darker on hover */
-            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
-        }
-        .accordion-header.active {
-            background-color: #DDE7F0; /* Keep active state background */
-            border-bottom-left-radius: 0; /* Remove bottom radius when open */
-            border-bottom-right-radius: 0;
-        }
-        .accordion-header span:last-child {
-            font-size: 2rem; /* Larger plus/minus */
-            line-height: 1;
-            transition: transform 0.3s ease;
-        }
-        .accordion-header.active span:last-child {
-            transform: rotate(45deg); /* Rotate for 'x' effect */
-        }
-        .accordion-content {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.6s cubic-bezier(0.25, 0.8, 0.25, 1), padding 0.6s cubic-bezier(0.25, 0.8, 0.25, 1); /* Smoother transition for padding */
-            padding: 0 1.8rem; /* Initial padding */
-            background-color: #FFFFFF; /* Match card background */
-            border-bottom-left-radius: 1rem; /* Rounded bottom corners */
-            border-bottom-right-radius: 1rem;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05); /* Shadow for content */
-        }
-        .accordion-content.active {
-            max-height: 1200px; /* Increased max-height to ensure content fits */
-            padding-top: 1.5rem; /* Add more padding when active */
-            padding-bottom: 2rem; /* Add more padding when active */
-        }
-        .accordion-item-card {
-            background-color: #F8FAFC; /* Lighter background for inner cards */
-            border-radius: 0.8rem;
-            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.02); /* Very subtle shadow */
-            padding: 1.8rem; /* More padding */
-            margin-bottom: 1.2rem; /* More spacing */
-            transition: transform 0.2s ease;
-            border: 1px solid rgba(0,0,0,0.03); /* Very subtle border */
-        }
-        .accordion-item-card:hover {
-            transform: translateY(-4px); /* Slightly more pronounced lift */
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
-        }
-        .accordion-item-card:last-child {
-            margin-bottom: 0;
-        }
-
-        /* Chart Container */
-        .chart-container {
-            background-color: #FFFFFF;
-            border-radius: 1.25rem; /* More rounded */
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1), 0 5px 15px rgba(0, 0, 0, 0.05); /* Consistent shadow */
-            padding: 2rem; /* More padding */
-            width: 100%;
-            max-width: 950px; /* Increased max-width */
-            margin-left: auto;
-            margin-right: auto;
-            height: 500px; /* Slightly taller */
-            max-height: 65vh; /* Responsive height */
-        }
-        @media (max-width: 767px) {
-            .chart-container {
-                height: 400px; /* Shorter on mobile */
-                max-height: 55vh;
-            }
-        }
-
-        /* Mobile Nav */
-        .hamburger-icon {
-            font-size: 2.2rem; /* Even larger icon */
-            color: #343A40;
-            transition: transform 0.3s ease;
-        }
-        .hamburger-icon.active {
-            transform: rotate(90deg);
-        }
-        .mobile-nav-links {
-            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); /* Smoother animation */
-            transform: translateY(-20px); /* More pronounced animation */
-            opacity: 0;
-        }
-        .mobile-nav-links.active {
-            transform: translateY(0);
-            opacity: 1;
-        }
-        .mobile-nav-links a {
-            font-weight: 600; /* Bolder links */
+        .mobile-menu-link:hover {
+            background-position: 0;
         }
     </style>
 </head>
-<body class="antialiased">
+<body class="text-gray-200">
 
-    <header class="bg-white header-shadow sticky top-0 z-50">
-        <nav class="container mx-auto px-6 py-4 flex justify-between items-center relative">
-            <div class="text-3xl font-extrabold text-gray-900">
-                Nobsa<span class="text-blue-600">GovTech</span>
-            </div>
+    <header class="bg-slate-950/70 backdrop-blur-md shadow-lg sticky top-0 z-50">
+        <nav class="container mx-auto px-6 py-3 flex justify-between items-center">
+            <h1 class="text-xl md:text-2xl font-bold text-teal-400">Tech Derby 2025</h1>
+            <!-- Desktop navigation -->
             <div class="hidden md:flex space-x-8">
-                <a href="#diagnostico" class="text-gray-600 hover:text-blue-600 font-medium transition duration-200">Diagnóstico</a>
-                <a href="#roadmap" class="text-gray-600 hover:text-blue-600 font-medium transition duration-200">Hoja de Ruta</a>
-                <a href="#impacto" class="text-gray-600 hover:text-blue-600 font-medium transition duration-200">Impacto</a>
-                <a href="#propuesta-valor" class="text-gray-600 hover:text-blue-600 font-medium transition duration-200">Propuesta de Valor</a>
+                <a href="#panorama" class="text-gray-300 hover:text-teal-400 transition-colors duration-300 font-medium">Panorama</a>
+                <a href="#demanda" class="text-gray-300 hover:text-teal-400 transition-colors duration-300 font-medium">Demanda Laboral</a>
+                <a href="#salarios" class="text-gray-300 hover:text-teal-400 transition-colors duration-300 font-medium">Salarios</a>
+                <a href="#futuro" class="text-gray-300 hover:text-teal-400 transition-colors duration-300 font-medium">Futuro</a>
             </div>
-            <div class="hamburger-icon md:hidden" id="hamburger-menu">
-                ☰
-            </div>
-            <div class="mobile-nav-links md:hidden absolute w-full left-0 top-full bg-white shadow-lg py-4" id="mobile-nav-links">
-                <a href="#diagnostico" class="block py-3 px-6 text-center text-gray-700 hover:bg-gray-50 transition duration-200 border-b border-gray-100">Diagnóstico</a>
-                <a href="#roadmap" class="block py-3 px-6 text-center text-gray-700 hover:bg-gray-50 transition duration-200 border-b border-gray-100">Hoja de Ruta</a>
-                <a href="#impacto" class="block py-3 px-6 text-center text-gray-700 hover:bg-gray-50 transition duration-200 border-b border-gray-100">Impacto</a>
-                <a href="#propuesta-valor" class="block py-3 px-6 text-center text-gray-700 hover:bg-gray-50 transition duration-200">Propuesta de Valor</a>
-            </div>
+            <!-- Hamburger menu button for mobile -->
+            <button id="hamburger-btn" class="md:hidden text-gray-300 hover:text-teal-400 focus:outline-none focus:ring-2 focus:ring-teal-400 rounded-md p-2 transition-colors duration-300">
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+                </svg>
+            </button>
         </nav>
     </header>
 
-    <main>
-        <section id="hero" class="hero-bg py-24 md:py-40 text-white">
-            <div class="container mx-auto px-6 text-center hero-content">
-                <h1 class="text-5xl md:text-7xl font-extrabold leading-tight">
-                    Transformando a Nobsa en un Líder de
-                    <span class="gradient-text">Innovación Digital</span>
-                </h1>
-                <p class="mt-8 max-w-4xl mx-auto text-xl font-light opacity-90">
-                    Una propuesta ejecutiva para modernizar la gestión pública, mejorar los servicios y fomentar la participación ciudadana a través de la tecnología y la inteligencia artificial.
-                </p>
-                <p class="mt-4 max-w-4xl mx-auto text-lg font-light opacity-80">
-                    Propuesta presentada por <a href="https://burodap.co" target="_blank" class="underline hover:text-white transition duration-200">burodap.co</a>
-                </p>
-                <div class="mt-12 flex justify-center">
-                    <a href="#roadmap" class="primary-button">
-                        Explorar la Hoja de Ruta
-                    </a>
+    <!-- Mobile menu overlay -->
+    <div id="mobile-menu" class="mobile-menu-overlay flex flex-col items-center justify-center space-y-8">
+        <button id="close-menu-btn" class="absolute top-6 right-6 text-gray-300 hover:text-teal-400 focus:outline-none">
+            <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+        </button>
+        <a href="#panorama" class="text-3xl font-semibold text-gray-800 mobile-menu-link">Panorama</a>
+        <a href="#demanda" class="text-3xl font-semibold text-gray-800 mobile-menu-link">Demanda Laboral</a>
+        <a href="#salarios" class="text-3xl font-semibold text-gray-800 mobile-menu-link">Salarios</a>
+        <a href="#futuro" class="text-3xl font-semibold text-gray-800 mobile-menu-link">Futuro</a>
+    </div>
+
+    <main class="container mx-auto px-6 py-8 md:py-12">
+
+        <section class="text-center mb-16">
+            <h2 class="text-3xl md:text-5xl font-bold mb-4 text-white">Análisis del Mercado Laboral Digital en Derby</h2>
+            <p class="text-lg md:text-xl text-gray-400 max-w-3xl mx-auto">Un ecosistema tecnológico en plena expansión, con una fuerte demanda de talento fundamental y especializado, y un futuro prometedor impulsado por la innovación y la inversión estratégica.</p>
+        </section>
+
+        <section id="panorama" class="mb-20 scroll-mt-20">
+            <h3 class="text-2xl md:text-3xl font-bold mb-8 section-title text-white">Panorama del Ecosistema</h3>
+            <p class="text-gray-400 mb-10 max-w-4xl">
+                Esta sección explora los componentes clave que definen el vibrante entorno tecnológico de Derby. Desde los sectores industriales que lideran la innovación hasta las empresas y centros educativos que impulsan el crecimiento, aquí obtendrás una visión completa de la estructura del ecosistema digital de la región.
+            </p>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="glass-card p-6 rounded-lg shadow-xl hover:shadow-2xl transition-shadow duration-300">
+                    <h4 class="font-bold text-xl mb-3 text-teal-400">Sectores Predominantes</h4>
+                    <ul class="space-y-2 text-gray-300">
+                        <li class="flex items-start"><span class="text-cyan-400 mr-2 mt-1">●</span><div><strong>Tecnología Inmersiva (VR/AR):</strong> Liderada por estudios como Bloc Digital, con aplicaciones en ingeniería y patrimonio.</div></li>
+                        <li class="flex items-start"><span class="text-cyan-400 mr-2 mt-1">●</span><div><strong>Inteligencia Artificial (IA):</strong> Crecimiento en transporte, inspecciones ferroviarias y tecnología de viajes.</div></li>
+                        <li class="flex items-start"><span class="text-cyan-400 mr-2 mt-1">●</span><div><strong>Servicios de TI Gestionados:</strong> Fuerte demanda de soporte, ciberseguridad y servicios en la nube para el tejido empresarial.</div></li>
+                    </ul>
+                </div>
+                <div class="glass-card p-6 rounded-lg shadow-xl hover:shadow-2xl transition-shadow duration-300">
+                    <h4 class="font-bold text-xl mb-3 text-teal-400">Empresas Clave</h4>
+                    <ul class="space-y-2 text-gray-300">
+                        <li class="flex items-start"><span class="text-cyan-400 mr-2 mt-1">●</span><div><strong>DerbySoft:</strong> Líder global en tecnología para la industria hotelera.</div></li>
+                        <li class="flex items-start"><span class="text-cyan-400 mr-2 mt-1">●</span><div><strong>Bloc Digital:</strong> Reconocido estudio de tecnología inmersiva.</div></li>
+                         <li class="flex items-start"><span class="text-cyan-400 mr-2 mt-1">●</span><div><strong>Syntax IT & Everything Tech:</strong> Proveedores integrales de servicios de TI.</div></li>
+                        <li class="flex items-start"><span class="text-cyan-400 mr-2 mt-1">●</span><div><strong>Concentrix:</strong> Gigante global de tecnología y servicios con nueva sede en Derby.</div></li>
+                    </ul>
+                </div>
+                <div class="glass-card p-6 rounded-lg shadow-xl hover:shadow-2xl transition-shadow duration-300">
+                    <h4 class="font-bold text-xl mb-3 text-teal-400">Centros de Innovación</h4>
+                    <ul class="space-y-2 text-gray-300">
+                        <li class="flex items-start"><span class="text-cyan-400 mr-2 mt-1">●</span><div><strong>Universidad de Derby:</strong> Con su Digital Design Hub y colaboraciones industriales.</div></li>
+                        <li class="flex items-start"><span class="text-cyan-400 mr-2 mt-1">●</span><div><strong>Derby College Group (DCG):</strong> Líder del East Midlands Institute of Technology (EMIoT) y los nuevos Digital Knowledge Exchange Hubs.</div></li>
+                        <li class="flex items-start"><span class="text-cyan-400 mr-2 mt-1">●</span><div><strong>Innovations Hub:</strong> Iniciativa del condado para impulsar la tecnología en los negocios.</div></li>
+                    </ul>
                 </div>
             </div>
         </section>
 
-        <section id="diagnostico" class="py-20">
-            <div class="container mx-auto px-6">
-                <h2 class="section-title">Diagnóstico Actual</h2>
-                <p class="section-subtitle">
-                    Nobsa cuenta con una base funcional, pero existen oportunidades claras para una transformación digital profunda. Este es nuestro punto de partida.
-                </p>
-                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-                    <div class="card p-8 flex flex-col items-center text-center">
-                        <div class="text-5xl mb-4 text-blue-600">🌐</div>
-                        <h3 class="text-xl font-bold mb-2 text-gray-800">Presencia Digital</h3>
-                        <p class="text-gray-600">Sitio web y redes sociales funcionales, pero con baja transaccionalidad e interacción. La mayoría de trámites en línea se concentran en el sector salud.</p>
+        <section id="demanda" class="mb-20 scroll-mt-20">
+            <h3 class="text-2xl md:text-3xl font-bold mb-8 section-title text-white">Demanda Laboral: Roles y Tecnologías</h3>
+            <p class="text-gray-400 mb-10 max-w-4xl">
+                Aquí analizamos en detalle qué perfiles y habilidades buscan las empresas en Derby. Explora los roles más solicitados, filtra por nivel de experiencia para ver cómo cambia la demanda y descubre las tecnologías clave y las modalidades de trabajo que dominan el mercado actual.
+            </p>
+            <div class="glass-card p-6 md:p-8 rounded-lg shadow-xl">
+                <div class="mb-6">
+                    <h4 class="font-semibold text-lg text-center mb-4 text-white">Filtra los Roles Más Solicitados por Experiencia</h4>
+                    <div id="experience-filter" class="flex justify-center flex-wrap gap-2 md:gap-4">
+                        <button data-level="all" class="filter-btn bg-teal-500 text-white px-4 py-2 rounded-md shadow-lg hover:bg-teal-600 transition duration-300 font-medium text-sm md:text-base">Todos</button>
+                        <button data-level="junior" class="filter-btn bg-slate-700 text-gray-200 px-4 py-2 rounded-md shadow-md hover:bg-slate-600 transition duration-300 font-medium text-sm md:text-base">Junior</button>
+                        <button data-level="mid" class="filter-btn bg-slate-700 text-gray-200 px-4 py-2 rounded-md shadow-md hover:bg-slate-600 transition duration-300 font-medium text-sm md:text-base">Mid-Level</button>
+                        <button data-level="senior" class="filter-btn bg-slate-700 text-gray-200 px-4 py-2 rounded-md shadow-md hover:bg-slate-600 transition duration-300 font-medium text-sm md:text-base">Senior</button>
                     </div>
-                    <div class="card p-8 flex flex-col items-center text-center">
-                        <div class="text-5xl mb-4 text-green-600">⚙️</div>
-                        <h3 class="text-xl font-bold mb-2 text-gray-800">Adopción Tecnológica Interna</h3>
-                        <p class="text-gray-600">Existe una Secretaría TIC y presupuesto asignado de <span class="font-bold text-blue-700">$318M</span>, pero se necesita mejorar la capacitación de los funcionarios.</p>
+                </div>
+                <div class="grid lg:grid-cols-2 gap-8 items-center">
+                    <div class="chart-container">
+                        <canvas id="rolesChart"></canvas>
                     </div>
-                    <div class="card p-8 flex flex-col items-center text-center">
-                        <div class="text-5xl mb-4 text-purple-600">📶</div>
-                        <h3 class="text-xl font-bold mb-2 text-gray-800">Conectividad Ciudadana</h3>
-                        <p class="text-gray-600">Avances con programas nacionales y oferta privada de fibra óptica. Persiste la brecha digital en algunos segmentos de la población.</p>
+                    <div id="roles-info" class="text-gray-300 p-4 bg-gray-800 rounded-lg">
+                        <h5 class="font-bold text-lg mb-2 text-white">Tecnologías Clave para <span id="level-text" class="text-teal-400">Todos los Niveles</span></h5>
+                        <p id="tech-text">El mercado de Derby muestra una demanda equilibrada. Para roles de entrada, se valoran las bases de soporte técnico y desarrollo. A nivel medio, la especialización en la pila de .NET y la nube es crucial. Los roles senior requieren liderazgo, arquitectura de sistemas complejos y experiencia profunda en plataformas como AWS y Azure.</p>
                     </div>
-                    <div class="card p-8 flex flex-col items-center text-center">
-                        <div class="text-5xl mb-4 text-orange-600">🚀</div>
-                        <h3 class="text-xl font-bold mb-2 text-gray-800">Iniciativas Previas</h3>
-                        <p class="text-gray-600">Experiencia acumulada con Puntos Vive Digital y capacitación a docentes. Existe un ecosistema de apoyo nacional y departamental.</p>
+                </div>
+                <hr class="my-10 border-gray-700">
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div>
+                        <h4 class="font-semibold text-lg text-center mb-4 text-white">Tecnologías Más Requeridas</h4>
+                        <div class="flex flex-wrap justify-center gap-3 text-sm">
+                            <span class="bg-teal-500/20 text-teal-200 px-3 py-1 rounded-full font-medium border border-teal-500/50">C#/.NET Core</span>
+                            <span class="bg-teal-500/20 text-teal-200 px-3 py-1 rounded-full font-medium border border-teal-500/50">SQL</span>
+                            <span class="bg-sky-500/20 text-sky-200 px-3 py-1 rounded-full font-medium border border-sky-500/50">JavaScript</span>
+                            <span class="bg-amber-500/20 text-amber-200 px-3 py-1 rounded-full font-medium border border-amber-500/50">AWS</span>
+                            <span class="bg-sky-500/20 text-sky-200 px-3 py-1 rounded-full font-medium border border-sky-500/50">Azure</span>
+                            <span class="bg-yellow-500/20 text-yellow-200 px-3 py-1 rounded-full font-medium border border-yellow-500/50">Power BI</span>
+                            <span class="bg-red-500/20 text-red-200 px-3 py-1 rounded-full font-medium border border-red-500/50">Python</span>
+                            <span class="bg-purple-500/20 text-purple-200 px-3 py-1 rounded-full font-medium border border-purple-500/50">VR/AR</span>
+                            <span class="bg-green-500/20 text-green-200 px-3 py-1 rounded-full font-medium border border-green-500/50">Ciberseguridad</span>
+                        </div>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <h4 class="font-semibold text-lg text-center mb-4 text-white">Modalidades de Trabajo</h4>
+                        <div class="w-48 h-48">
+                            <canvas id="workModalitiesChart"></canvas>
+                        </div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <section id="roadmap" class="py-20 bg-white">
-            <div class="container mx-auto px-6">
-                <h2 class="section-title">Hoja de Ruta por Fases</h2>
-                <p class="section-subtitle">
-                    Proponemos una implementación gradual y estratégica en tres fases para asegurar una transición exitosa, maximizando el valor en cada etapa y permitiendo la adaptación continua.
-                </p>
-                
-                <div class="border-b border-gray-200 mb-8 hidden md:block tab-buttons-container">
-                    <nav class="-mb-px flex justify-center space-x-4 md:space-x-8" aria-label="Tabs">
-                        <button data-tab="fase1" class="tab-btn whitespace-nowrap tab-active">
-                            Fase 1: Corto Plazo (6-12m)
-                        </button>
-                        <button data-tab="fase2" class="tab-btn whitespace-nowrap tab-inactive">
-                            Fase 2: Mediano Plazo (12-24m)
-                        </button>
-                        <button data-tab="fase3" class="tab-btn whitespace-nowrap tab-inactive">
-                            Fase 3: Largo Plazo (24-48m)
-                        </button>
-                    </nav>
-                </div>
-
-                <div id="tab-content" class="mt-8 hidden md:block tab-content-wrapper">
-                    <!-- Content for desktop tabs -->
-                </div>
-
-                <div id="accordion-content" class="mt-8 block md:hidden">
-                    <!-- Content for mobile accordion -->
-                </div>
-            </div>
-        </section>
-
-        <section id="impacto" class="py-20">
-            <div class="container mx-auto px-6">
-                <h2 class="section-title">Indicadores de Impacto Esperados</h2>
-                <p class="section-subtitle">
-                    La implementación de esta hoja de ruta generará beneficios medibles en los ámbitos social, económico y administrativo, mejorando la calidad de vida y la eficiencia de la gestión.
-                </p>
+        <section id="salarios" class="mb-20 scroll-mt-20">
+            <h3 class="text-2xl md:text-3xl font-bold mb-8 section-title text-white">Análisis de Salarios</h3>
+             <p class="text-gray-400 mb-10 max-w-4xl">
+                Esta sección ofrece una visión clara de la compensación en el sector tecnológico de Derby. Compara los rangos salariales promedio para los roles más importantes y explora las tendencias de crecimiento, especialmente en áreas de alta demanda como la Inteligencia Artificial, para entender el valor de mercado de cada especialidad.
+            </p>
+            <div class="glass-card p-6 md:p-8 rounded-lg shadow-xl">
+                <h4 class="font-semibold text-lg text-center mb-4 text-white">Comparativa Salarial Anual Promedio (£)</h4>
                 <div class="chart-container">
-                    <canvas id="impactChart"></canvas>
+                    <canvas id="salariesChart"></canvas>
                 </div>
-                 <p class="text-center text-gray-600 mt-6 text-base">Los valores representan el impacto acumulado proyectado al finalizar la hoja de ruta, mostrando el potencial transformador de la estrategia.</p>
+                 <p class="text-center text-sm text-gray-400 mt-4">Los salarios reflejan una clara progresión profesional. Los roles de liderazgo y especializados en datos y nube alcanzan los rangos más altos, incentivando la especialización y la adquisición de experiencia.</p>
             </div>
         </section>
 
-        <section id="propuesta-valor" class="py-20 bg-white">
-            <div class="container mx-auto px-6">
-                <h2 class="section-title">Propuesta de Valor Diferenciadora</h2>
-                <p class="section-subtitle">
-                    Nobsa no solo se modernizará, sino que se posicionará como un modelo a seguir en gobierno digital para Boyacá y Colombia.
-                </p>
-                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-                    <div class="flex items-start space-x-4">
-                        <div class="text-4xl text-blue-600">✓</div>
-                        <div>
-                            <h3 class="font-bold text-xl text-gray-800">Enfoque Holístico</h3>
-                            <p class="text-gray-600">Abordaje integral que conecta la eficiencia interna, los servicios al ciudadano y la participación pública.</p>
-                        </div>
-                    </div>
-                    <div class="flex items-start space-x-4">
-                        <div class="text-4xl text-green-600">✓</div>
-                        <div>
-                            <h3 class="font-bold text-xl text-gray-800">Pionerismo en IA</h3>
-                            <p class="text-gray-600">Adopción temprana de IA avanzada (LangChain, CrewAI) para generar conocimiento y atraer talento.</p>
-                        </div>
-                    </div>
-                    <div class="flex items-start space-x-4">
-                        <div class="text-4xl text-purple-600">✓</div>
-                        <div>
-                            <h3 class="font-bold text-xl text-gray-800">Gobierno Centrado en el Ciudadano</h3>
-                            <p class="text-gray-600">Servicios personalizados y proactivos que mejoran la experiencia y satisfacción del ciudadano.</p>
-                        </div>
-                    </div>
-                    <div class="flex items-start space-x-4">
-                        <div class="text-4xl text-orange-600">✓</div>
-                        <div>
-                            <h3 class="font-bold text-xl text-gray-800">Transparencia Basada en Datos</h3>
-                            <p class="text-gray-600">Uso de dashboards y datos abiertos para optimizar recursos y fomentar la rendición de cuentas.</p>
-                        </div>
-                    </div>
-                     <div class="flex items-start space-x-4">
-                        <div class="text-4xl text-red-600">✓</div>
-                        <div>
-                            <h3 class="font-bold text-xl text-gray-800">Aprovechamiento del Ecosistema</h3>
-                            <p class="text-gray-600">Sinergia con iniciativas de MinTIC y la Gobernación para asegurar sostenibilidad y escalabilidad.</p>
-                        </div>
-                    </div>
-                     <div class="flex items-start space-x-4">
-                        <div class="text-4xl text-teal-600">✓</div>
-                        <div>
-                            <h3 class="font-bold text-xl text-gray-800">Fomento a la Innovación Local</h3>
-                            <p class="text-gray-600">Creación de un ecosistema que impulse el emprendimiento y genere nuevas oportunidades económicas.</p>
-                        </div>
-                    </div>
+        <section id="futuro" class="scroll-mt-20">
+            <h3 class="text-2xl md:text-3xl font-bold mb-8 section-title text-white">Proyecciones a Futuro (6-24 meses)</h3>
+            <p class="text-gray-400 mb-10 max-w-4xl">
+                Mirando hacia adelante, esta sección destaca las tendencias que darán forma al mercado laboral de Derby. Descubre qué roles y tecnologías emergentes experimentarán un mayor crecimiento y qué factores externos, como las inversiones gubernamentales y la evolución del trabajo híbrido, impactarán la demanda de talento.
+            </p>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="glass-card p-6 rounded-lg shadow-xl hover:shadow-2xl transition-shadow duration-300">
+                    <h4 class="font-bold text-xl mb-3 text-teal-400">Roles en Crecimiento</h4>
+                    <ul class="space-y-2 text-gray-300">
+                        <li><span class="font-semibold">Especialistas en IA/ML:</span> Impulsados por la digitalización del transporte y servicios.</li>
+                        <li><span class="font-semibold">Profesionales de Ciberseguridad:</span> Demanda constante por el aumento de ciberamenazas.</li>
+                        <li><span class="font-semibold">Ingenieros de Nube y DevOps:</span> Esenciales para infraestructuras escalables.</li>
+                    </ul>
+                </div>
+                <div class="glass-card p-6 rounded-lg shadow-xl hover:shadow-2xl transition-shadow duration-300">
+                    <h4 class="font-bold text-xl mb-3 text-teal-400">Tecnologías con Mayor Adopción</h4>
+                    <ul class="space-y-2 text-gray-300">
+                        <li><span class="font-semibold">IA Generativa:</span> Aumento de la experimentación y búsqueda de monetización.</li>
+                        <li><span class="font-semibold">IoT y Smart Cities:</span> Gracias a la estrategia de conectividad regional.</li>
+                        <li><span class="font-semibold">VR/AR para Colaboración:</span> Potencial para mejorar la interacción en equipos híbridos.</li>
+                    </ul>
+                </div>
+                <div class="glass-card p-6 rounded-lg shadow-xl hover:shadow-2xl transition-shadow duration-300">
+                    <h4 class="font-bold text-xl mb-3 text-teal-400">Factores Externos Clave</h4>
+                    <ul class="space-y-2 text-gray-300">
+                        <li><span class="font-semibold">Inversión Gubernamental:</span> Programas como 'Project Gigabit' y la 'East Midlands Investment Zone'.</li>
+                        <li><span class="font-semibold">Escasez de Habilidades Post-Brexit:</span> Desafío continuo en la atracción de talento STEM.</li>
+                        <li><span class="font-semibold">Evolución del Trabajo Híbrido:</span> Factor clave para la atracción y retención de talento.</li>
+                    </ul>
                 </div>
             </div>
         </section>
+
     </main>
 
-    <footer class="bg-gray-900 text-white">
-        <div class="container mx-auto px-6 py-10 text-center">
-            <p class="text-lg font-medium">&copy; 2025 Propuesta de Transformación Digital para Nobsa, Boyacá.</p>
-            <p class="text-sm text-gray-400 mt-3">Una iniciativa para un gobierno más eficiente, transparente y cercano, impulsada por la innovación.</p>
-            <p class="text-sm text-gray-400 mt-2 flex items-center justify-center">
-                Propuesta elaborada por 
-                <a href="https://burodap.co" target="_blank" class="underline hover:text-white transition duration-200 ml-1">
-                    burodap.co
-                    <img src="https://placehold.co/80x25/000000/FFFFFF?text=BURODAP" alt="Logo Burodap.co" class="inline-block h-5 ml-1 align-middle">
-                </a>
-            </p>
+    <footer class="bg-gray-900 text-gray-400 mt-20">
+        <div class="container mx-auto px-6 py-4 text-center">
+            <p>&copy; 2025 Análisis del Mercado Laboral de Derby. Creado a partir de datos públicos y de mercado.</p>
         </div>
     </footer>
 
     <script>
-        const tabData = {
-            fase1: {
-                title: 'Fase 1: Cimientos Digitales y Optimización de Servicios',
-                objective: 'Fortalecer la base digital, mejorar la accesibilidad a la información y optimizar la interacción inicial con la ciudadanía, sentando las bases para futuras implementaciones de IA.',
-                items: [
-                    { 
-                        icon: '🌐', 
-                        title: 'Mejora de Plataformas Web', 
-                        description: 'Rediseño del sitio web oficial para ser más intuitivo, móvil y centrado en el ciudadano, integrado con el Portal Único del Estado.',
-                        tech: 'HTML5, CSS3, JS'
-                    },
-                    { 
-                        icon: '🗂️', 
-                        title: 'Gestión Documental Electrónica (SGDE)', 
-                        description: 'Digitalización y centralización de archivos para mejorar la eficiencia, trazabilidad y seguridad de la información.',
-                        tech: 'SGDE'
-                    },
-                    { 
-                        icon: '🤖', 
-                        title: 'Chatbot de Atención Básica', 
-                        description: 'Agente conversacional para responder preguntas frecuentes sobre servicios, horarios y trámites, disponible 24/7.',
-                        tech: 'LangChain'
-                    },
-                    { 
-                        icon: '📝', 
-                        title: 'PQRS en Línea', 
-                        description: 'Implementación de un portal interactivo para radicar y seguir en tiempo real el estado de Peticiones, Quejas, Reclamos y Sugerencias.',
-                        tech: 'Plataforma Web'
-                    }
-                ]
-            },
-            fase2: {
-                title: 'Fase 2: Inteligencia Operacional y Participación Ciudadana',
-                objective: 'Automatizar procesos internos clave, mejorar la toma de decisiones estratégicas con datos y potenciar la participación ciudadana a través de plataformas inteligentes.',
-                items: [
-                    { 
-                        icon: '🔄', 
-                        title: 'Automatización de Flujos de Trabajo', 
-                        description: 'Agentes de IA para automatizar tareas repetitivas como clasificación de correos, extracción de datos y pre-procesamiento de solicitudes.',
-                        tech: 'LangGraph, CrewAI'
-                    },
-                    { 
-                        icon: '�', 
-                        title: 'Dashboards de Decisión con IA', 
-                        description: 'Paneles de control interactivos que integran datos municipales para identificar tendencias, anticipar problemas y ofrecer recomendaciones.',
-                        tech: 'Business Intelligence, IA'
-                    },
-                    { 
-                        icon: '🗳️', 
-                        title: 'Plataforma de Participación Inteligente', 
-                        description: 'Espacio digital para proponer ideas, votar en iniciativas y recibir información personalizada, con IA para analizar y resumir propuestas.',
-                        tech: 'LangChain'
-                    },
-                    { 
-                        icon: '🤝', 
-                        title: 'Automatización de Contratación Menor', 
-                        description: 'Flujo de trabajo automatizado para reducir tiempos y errores en procesos de compras y contratación de menor cuantía.',
-                        tech: 'LangGraph'
-                    }
-                ]
-            },
-            fase3: {
-                title: 'Fase 3: Ecosistema GovTech y Ciudad Inteligente',
-                objective: 'Consolidar a Nobsa como un epicentro de innovación GovTech, atrayendo talento y desarrollando capacidades de ciudad inteligente para mejorar la calidad de vida.',
-                items: [
-                    { 
-                        icon: '🔓', 
-                        title: 'Plataforma de Datos Abiertos', 
-                        description: 'Publicación de datos públicos (presupuesto, contratos, estadísticas) para fomentar la transparencia y la creación de nuevas soluciones.',
-                        tech: 'Open Data'
-                    },
-                    { 
-                        icon: '📡', 
-                        title: 'Pilotos de IoT y Blockchain', 
-                        description: 'Monitoreo inteligente de infraestructura (calidad del aire, gestión de residuos) y exploración de blockchain para registros públicos seguros.',
-                        tech: 'IoT, Blockchain'
-                    },
-                    { 
-                        icon: '🧠', 
-                        title: 'IA Generativa y Analítica Predictiva', 
-                        description: 'Uso de IA para simular el impacto de políticas públicas, anticipar necesidades ciudadanas y optimizar la planificación urbana.',
-                        tech: 'IA Generativa'
-                    },
-                    { 
-                        icon: '💡', 
-                        title: 'Laboratorio de Innovación Pública', 
-                        description: 'Organización de hackatones y eventos para co-crear soluciones a desafíos municipales junto a la comunidad, universidades y startups.',
-                        tech: 'Innovación Abierta'
-                    }
-                ]
-            }
-        };
-
-        const tabContentContainer = document.getElementById('tab-content');
-        const accordionContentContainer = document.getElementById('accordion-content');
-        const tabButtons = document.querySelectorAll('.tab-btn');
-        const hamburgerMenu = document.getElementById('hamburger-menu');
-        const mobileNavLinks = document.getElementById('mobile-nav-links');
-        const tabButtonsContainer = document.querySelector('.tab-buttons-container'); 
-
-        // Toggle mobile navigation menu
-        hamburgerMenu.addEventListener('click', () => {
-            mobileNavLinks.classList.toggle('active');
-            hamburgerMenu.classList.toggle('active');
-        });
-
-        // Close mobile nav when a link is clicked
-        mobileNavLinks.querySelectorAll('a').forEach(link => {
-            link.addEventListener('click', () => {
-                mobileNavLinks.classList.remove('active');
-                hamburgerMenu.classList.remove('active');
-            });
-        });
-
-        function renderTabContent(tabKey) {
-            const data = tabData[tabKey];
-            let content = `
-                <div class="text-center mb-12 animate-fade-in">
-                    <h3 class="text-2xl font-bold text-gray-800">${data.title}</h3>
-                    <p class="mt-2 max-w-3xl mx-auto text-gray-600">${data.objective}</p>
-                </div>
-                <div class="grid md:grid-cols-2 gap-8">
-                    ${data.items.map(item => `
-                        <div class="card p-6">
-                            <div class="flex items-start space-x-4">
-                                <div class="text-3xl mt-1">${item.icon}</div>
-                                <div>
-                                    <h4 class="font-bold text-lg text-gray-900">${item.title}</h4>
-                                    <p class="text-gray-600 mt-1">${item.description}</p>
-                                    <div class="mt-3 inline-block bg-blue-100 text-blue-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-full">${item.tech}</div>
-                                </div>
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
-            tabContentContainer.innerHTML = content;
-        }
-
-        function renderAccordionContent() {
-            let content = '';
-            Object.keys(tabData).forEach((key, index) => {
-                const data = tabData[key];
-                const isActive = (window.innerWidth < 768 && index === 0) ? 'active' : ''; 
-                const plusMinus = (window.innerWidth < 768 && index === 0) ? '−' : '+';
-
-                content += `
-                    <div class="mb-4">
-                        <div class="accordion-header ${isActive ? 'active' : ''}" data-accordion-id="${key}">
-                            <span>${data.title}</span>
-                            <span>${plusMinus}</span>
-                        </div>
-                        <div class="accordion-content ${isActive}" style="max-height: ${isActive ? '1000px' : '0'};">
-                            <div class="p-4 bg-white rounded-b-lg shadow-sm">
-                                <p class="mb-4 text-gray-700">${data.objective}</p>
-                                <div class="grid grid-cols-1 gap-6">
-                                    ${data.items.map(item => `
-                                        <div class="accordion-item-card flex items-start space-x-4">
-                                            <div class="text-3xl mt-1">${item.icon}</div>
-                                            <div>
-                                                <h4 class="font-bold text-lg text-gray-900">${item.title}</h4>
-                                                <p class="text-gray-600 mt-1">${item.description}</p>
-                                                <div class="mt-3 inline-block bg-blue-100 text-blue-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-full">${item.tech}</div>
-                                            </div>
-                                        </div>
-                                    `).join('')}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            });
-            accordionContentContainer.innerHTML = content;
-
-            document.querySelectorAll('.accordion-header').forEach(header => {
-                header.addEventListener('click', () => {
-                    const content = header.nextElementSibling;
-                    const plusMinus = header.querySelector('span:last-child');
-                    const isActive = header.classList.contains('active');
-
-                    // Close all other accordions
-                    document.querySelectorAll('.accordion-header.active').forEach(openHeader => {
-                        openHeader.classList.remove('active');
-                        openHeader.nextElementSibling.classList.remove('active');
-                        openHeader.nextElementSibling.style.maxHeight = '0';
-                        openHeader.querySelector('span:last-child').textContent = '+';
-                    });
-
-                    if (!isActive) {
-                        // Open current accordion
-                        header.classList.add('active');
-                        content.classList.add('active');
-                        content.style.maxHeight = content.scrollHeight + 'px'; // Set to actual scroll height
-                        plusMinus.textContent = '−';
-                    } else {
-                        // If it was active and clicked again, close it
-                        header.classList.remove('active');
-                        content.classList.remove('active');
-                        content.style.maxHeight = '0';
-                        plusMinus.textContent = '+';
-                    }
-                });
-            });
-        }
-
-        function handleResize() {
-            if (window.innerWidth >= 768) { // md breakpoint
-                tabButtonsContainer.classList.remove('hidden');
-                tabButtonsContainer.classList.add('block');
-                tabContentContainer.classList.remove('hidden');
-                tabContentContainer.classList.add('block');
-                accordionContentContainer.classList.remove('block');
-                accordionContentContainer.classList.add('hidden');
-                renderTabContent('fase1'); // Re-render default tab on desktop
-            } else {
-                tabButtonsContainer.classList.remove('block');
-                tabButtonsContainer.classList.add('hidden');
-                tabContentContainer.classList.remove('block');
-                tabContentContainer.classList.add('hidden');
-                accordionContentContainer.classList.remove('hidden');
-                accordionContentContainer.classList.add('block');
-                renderAccordionContent();
-            }
-        }
-
-        tabButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                const tabId = button.dataset.tab;
-                
-                tabButtons.forEach(btn => {
-                    btn.classList.remove('tab-active');
-                    btn.classList.add('tab-inactive');
-                });
-                
-                button.classList.add('tab-active');
-                button.classList.remove('tab-inactive');
-                
-                renderTabContent(tabId);
-            });
-        });
-
-        document.addEventListener('DOMContentLoaded', () => {
-            handleResize(); // Call handleResize on initial load
+        document.addEventListener('DOMContentLoaded', function () {
             
-            const ctx = document.getElementById('impactChart').getContext('2d');
-            const impactChart = new Chart(ctx, {
+            const rolesData = {
+                all: {
+                    labels: ['Software Dev/Eng', 'IT Support Tech', 'Data Analyst', 'DevOps Engineer', 'QA Engineer'],
+                    data: [100, 95, 70, 65, 60],
+                    techText: 'El mercado de Derby muestra una demanda equilibrada. Para roles de entrada, se valoran las bases de soporte técnico y desarrollo. A nivel medio, la especialización en la pila de .NET y la nube es crucial. Los roles senior requieren liderazgo, arquitectura de sistemas complejos y experiencia profunda en plataformas como AWS y Azure.'
+                },
+                junior: {
+                    labels: ['IT Support Tech', 'Trainee Software Dev', 'Junior IT Support'],
+                    data: [100, 85, 80],
+                    techText: 'Se valora el conocimiento de sistemas operativos (Windows, macOS), redes y hardware. Para desarrolladores, se buscan fundamentos de C#, .NET, y SQL. La voluntad de aprender es clave, y muchas empresas ofrecen formación en el puesto.'
+                },
+                mid: {
+                    labels: ['Software Developer', 'Data Analyst', 'IT Support (2nd Line)'],
+                    data: [100, 75, 70],
+                    techText: 'Se requiere experiencia sólida en C#, .NET Core, ASP.NET Core, y plataformas cloud como AWS o Azure. Para analistas, el dominio de SQL, Power BI, y DAX es fundamental. Se espera autonomía y capacidad de resolución de problemas complejos.'
+                },
+                senior: {
+                    labels: ['Senior Software Dev', 'Lead Data Engineer', 'DevOps Engineer', 'Head of Tech Services'],
+                    data: [100, 85, 80, 70],
+                    techText: 'Se busca experiencia en arquitectura de software, liderazgo de equipos y gestión de proyectos. El dominio de AWS/Azure, Databricks, y metodologías Agile es indispensable. Se valora la visión estratégica y la capacidad de mentoría.'
+                }
+            };
+
+            const salariesData = {
+                labels: ['Head of Tech Services', 'Lead Data Engineer', 'Senior Software Dev', 'Software Engineer (Avg)', 'Data Analyst', 'Trainee Software Dev'],
+                data: [110000, 90000, 67500, 57500, 50000, 30500]
+            };
+
+            const workModalitiesData = {
+                labels: ['Híbrido', 'Remoto', 'Presencial'],
+                data: [51, 28, 21]
+            };
+            
+            Chart.defaults.font.family = "'Inter', sans-serif";
+            Chart.defaults.color = '#9ca3af';
+
+            const rolesCtx = document.getElementById('rolesChart').getContext('2d');
+            const rolesChart = new Chart(rolesCtx, {
                 type: 'bar',
                 data: {
-                    labels: ['Social', 'Económico', 'Administrativo'],
+                    labels: rolesData.all.labels,
                     datasets: [{
-                        label: 'Aumento de Satisfacción/Participación (%)',
-                        data: [30, 0, 0],
-                        backgroundColor: ['#4A90E2', '#6FCF97', '#FFD700'], /* Modern colors */
-                        borderColor: ['#3A7ADF', '#5CBF80', '#E6C200'],
-                        borderWidth: 1
-                    }, {
-                        label: 'Reducción de Costos / Optimización (%)',
-                        data: [0, 25, 0],
-                        backgroundColor: ['#6FCF97', '#4A90E2', '#FFD700'], /* Modern colors */
-                        borderColor: ['#5CBF80', '#3A7ADF', '#E6C200'],
-                        borderWidth: 1
-                    }, {
-                        label: 'Mejora de Eficiencia / Calidad (%)',
-                        data: [0, 0, 50],
-                        backgroundColor: ['#FFD700', '#4A90E2', '#6FCF97'], /* Modern colors */
-                        borderColor: ['#E6C200', '#3A7ADF', '#5CBF80'],
+                        label: 'Demanda Relativa',
+                        data: rolesData.all.data,
+                        backgroundColor: 'rgba(20, 184, 166, 0.6)',
+                        borderColor: 'rgba(20, 184, 166, 1)',
                         borderWidth: 1
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    indexAxis: 'y',
                     scales: {
-                        y: {
-                            beginAtZero: true,
-                            title: {
-                                display: true,
-                                text: 'Impacto Proyectado (%)',
-                                color: '#2C3E50',
-                                font: {
-                                    size: 14,
-                                    weight: 'bold'
-                                }
-                            },
-                            ticks: {
-                                color: '#607D8B'
-                            },
-                            grid: {
-                                color: 'rgba(0,0,0,0.05)'
-                            }
-                        },
                         x: {
-                            ticks: {
-                                color: '#2C3E50'
-                            },
-                            grid: {
-                                display: false
-                            }
+                            beginAtZero: true,
+                            grid: { display: false },
+                            ticks: { display: false }
+                        },
+                        y: {
+                           grid: { color: '#4a4a4a' }
                         }
                     },
                     plugins: {
+                        legend: {
+                            display: false
+                        },
                         tooltip: {
+                            backgroundColor: '#1f2937',
+                            titleColor: '#e5e7eb',
+                            bodyColor: '#d1d5db',
+                            borderColor: '#4b5563',
+                            borderWidth: 1,
                             callbacks: {
                                 label: function(context) {
-                                    let label = context.dataset.label || '';
-                                    if (label) {
-                                        label += ': ';
-                                    }
-                                    if (context.parsed.y !== null && context.parsed.y > 0) {
-                                        label += context.parsed.y + '%';
-                                    }
-                                    return label;
+                                    return `Demanda: ${context.raw}`;
                                 }
-                            },
-                            backgroundColor: 'rgba(44, 62, 80, 0.9)', /* Darker tooltip */
-                            titleFont: { size: 14, weight: 'bold' },
-                            bodyFont: { size: 12 },
-                            padding: 10,
-                            cornerRadius: 6
-                        },
-                        legend: {
-                            position: 'bottom', /* Move legend to bottom */
-                            labels: {
-                                font: {
-                                    size: 12,
-                                    weight: '500'
-                                },
-                                color: '#2C3E50'
-                            }
-                        },
-                        title: {
-                            display: true,
-                            text: 'Impacto Acumulado por Categoría',
-                            color: '#2C3E50',
-                            font: {
-                                size: 18,
-                                weight: 'bold'
-                            },
-                            padding: {
-                                top: 10,
-                                bottom: 20
                             }
                         }
                     }
                 }
             });
 
-            const navLinks = document.querySelectorAll('nav a[href^="#"]');
-            navLinks.forEach(anchor => {
-                anchor.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    document.querySelector(this.getAttribute('href')).scrollIntoView({
-                        behavior: 'smooth'
+            const salariesCtx = document.getElementById('salariesChart').getContext('2d');
+            const salariesChart = new Chart(salariesCtx, {
+                type: 'bar',
+                data: {
+                    labels: salariesData.labels,
+                    datasets: [{
+                        label: 'Salario Anual Promedio (£)',
+                        data: salariesData.data,
+                        backgroundColor: [
+                            'rgba(20, 184, 166, 0.8)',
+                            'rgba(20, 184, 166, 0.7)',
+                            'rgba(20, 184, 166, 0.6)',
+                            'rgba(20, 184, 166, 0.5)',
+                            'rgba(20, 184, 166, 0.4)',
+                            'rgba(20, 184, 166, 0.3)'
+                        ],
+                        borderColor: 'rgba(20, 184, 166, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                     scales: {
+                        x: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value, index, values) {
+                                    return '£' + (value / 1000) + 'k';
+                                }
+                            }
+                        },
+                        y: {
+                            grid: { color: '#4a4a4a' }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                             backgroundColor: '#1f2937',
+                            titleColor: '#e5e7eb',
+                            bodyColor: '#d1d5db',
+                            borderColor: '#4b5563',
+                            borderWidth: 1,
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.x !== null) {
+                                        label += new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP', minimumFractionDigits: 0 }).format(context.parsed.x);
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            const workModalitiesCtx = document.getElementById('workModalitiesChart').getContext('2d');
+            const workModalitiesChart = new Chart(workModalitiesCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: workModalitiesData.labels,
+                    datasets: [{
+                        label: 'Modalidad de Trabajo',
+                        data: workModalitiesData.data,
+                        backgroundColor: [
+                            'rgba(20, 184, 166, 0.7)',
+                            'rgba(59, 130, 246, 0.7)',
+                            'rgba(249, 115, 22, 0.7)'
+                        ],
+                        borderColor: '#0c0a09',
+                        borderWidth: 2,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                boxWidth: 12,
+                                padding: 15,
+                                color: '#d1d5db'
+                            }
+                        }
+                    }
+                }
+            });
+
+            const filterButtons = document.querySelectorAll('.filter-btn');
+            const levelText = document.getElementById('level-text');
+            const techText = document.getElementById('tech-text');
+
+            filterButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const level = button.dataset.level;
+                    
+                    filterButtons.forEach(btn => {
+                        btn.classList.remove('bg-teal-500', 'text-white', 'shadow-lg');
+                        btn.classList.add('bg-slate-700', 'text-gray-200', 'shadow-md');
                     });
+                    button.classList.add('bg-teal-500', 'text-white', 'shadow-lg');
+                    button.classList.remove('bg-slate-700', 'text-gray-200', 'shadow-md');
+
+                    rolesChart.data.labels = rolesData[level].labels;
+                    rolesChart.data.datasets[0].data = rolesData[level].data;
+                    rolesChart.update();
+
+                    levelText.textContent = button.textContent;
+                    techText.textContent = rolesData[level].techText;
+                });
+            });
+
+            // Mobile menu logic
+            const hamburgerBtn = document.getElementById('hamburger-btn');
+            const closeMenuBtn = document.getElementById('close-menu-btn');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const mobileMenuLinks = mobileMenu.querySelectorAll('a');
+
+            hamburgerBtn.addEventListener('click', () => {
+                mobileMenu.classList.add('open');
+                document.body.style.overflow = 'hidden';
+            });
+
+            closeMenuBtn.addEventListener('click', () => {
+                mobileMenu.classList.remove('open');
+                document.body.style.overflow = 'auto';
+            });
+            
+            mobileMenuLinks.forEach(link => {
+                link.addEventListener('click', () => {
+                    mobileMenu.classList.remove('open');
+                    document.body.style.overflow = 'auto';
                 });
             });
         });
-
-        // Add event listener for window resize
-        window.addEventListener('resize', handleResize);
     </script>
 </body>
 </html>
+
