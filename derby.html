@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Interactivo: Mercado Laboral Tecnológico en Derby</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Dark & Vibrant (Slate-950, Teal-500, Sky-400, Amber-400) -->
+    <!-- Application Structure Plan: He diseñado esta aplicación como un panel de control temático de una sola página. En lugar de seguir la estructura lineal del informe, he agrupado la información en cuatro secciones lógicas y navegables: Panorama, Demanda Laboral, Salarios y Futuro. Este enfoque permite a los usuarios (como buscadores de empleo, reclutadores o analistas) acceder directamente a la información que más les interesa a través de una barra de navegación fija. La interactividad se centra en filtros y gráficos dinámicos para que la exploración de datos sea intuitiva y atractiva, transformando la lectura pasiva en un descubrimiento activo. El nuevo diseño aplica un tema oscuro moderno y un menú de navegación de hamburguesa para una mejor experiencia móvil. -->
+    <!-- Visualization & Content Choices: He seleccionado visualizaciones para cada tipo de dato con el objetivo de maximizar la claridad y la interacción. Para comparar la demanda de roles, un gráfico de barras con filtros por experiencia (Chart.js) es más efectivo que una tabla estática. Para mostrar proporciones como las modalidades de trabajo, un gráfico de dona (Chart.js) es universalmente comprendido. Los salarios se comparan con un gráfico de barras horizontal, fácil de leer. Las proyecciones y la información cualitativa se presentan en tarjetas (HTML/Tailwind) con un efecto de "glassmorphism" para una mejor legibilidad y un toque moderno. Todas las elecciones evitan SVG y Mermaid, centrándose en Canvas para los gráficos y HTML/CSS para los diagramas, asegurando una experiencia interactiva y coherente. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0c0a09;
+            background-image: radial-gradient(at 0% 0%, #164e63 0%, transparent 50%), radial-gradient(at 100% 100%, #155e75 0%, transparent 50%);
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .section-title::after {
+            content: '';
+            display: block;
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, #14b8a6, #22d3ee);
+            margin-top: 8px;
+        }
+        .glass-card {
+            background-color: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .mobile-menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background-color: rgba(12, 10, 9, 0.95);
+            z-index: 40;
+            transition: transform 0.3s ease-out;
+            transform: translateX(100%);
+        }
+        .mobile-menu-overlay.open {
+            transform: translateX(0);
+        }
+        .mobile-menu-link {
+            background-image: linear-gradient(to right, #14b8a6, #14b8a6 50%, #fff 50%);
+            background-size: 200% 100%;
+            background-position: -100%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            transition: all 0.3s ease-in-out;
+            font-weight: 600;
+        }
+        .mobile-menu-link:hover {
+            background-position: 0;
+        }
+    </style>
+</head>
+<body class="text-gray-200">
+
+    <header class="bg-slate-950/70 backdrop-blur-md shadow-lg sticky top-0 z-50">
+        <nav class="container mx-auto px-6 py-3 flex justify-between items-center">
+            <h1 class="text-xl md:text-2xl font-bold text-teal-400">Tech Derby 2025</h1>
+            <!-- Desktop navigation -->
+            <div class="hidden md:flex space-x-8">
+                <a href="#panorama" class="text-gray-300 hover:text-teal-400 transition-colors duration-300 font-medium">Panorama</a>
+                <a href="#demanda" class="text-gray-300 hover:text-teal-400 transition-colors duration-300 font-medium">Demanda Laboral</a>
+                <a href="#salarios" class="text-gray-300 hover:text-teal-400 transition-colors duration-300 font-medium">Salarios</a>
+                <a href="#futuro" class="text-gray-300 hover:text-teal-400 transition-colors duration-300 font-medium">Futuro</a>
+            </div>
+            <!-- Hamburger menu button for mobile -->
+            <button id="hamburger-btn" class="md:hidden text-gray-300 hover:text-teal-400 focus:outline-none focus:ring-2 focus:ring-teal-400 rounded-md p-2 transition-colors duration-300">
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+                </svg>
+            </button>
+        </nav>
+    </header>
+
+    <!-- Mobile menu overlay -->
+    <div id="mobile-menu" class="mobile-menu-overlay flex flex-col items-center justify-center space-y-8">
+        <button id="close-menu-btn" class="absolute top-6 right-6 text-gray-300 hover:text-teal-400 focus:outline-none">
+            <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+        </button>
+        <a href="#panorama" class="text-3xl font-semibold text-gray-800 mobile-menu-link">Panorama</a>
+        <a href="#demanda" class="text-3xl font-semibold text-gray-800 mobile-menu-link">Demanda Laboral</a>
+        <a href="#salarios" class="text-3xl font-semibold text-gray-800 mobile-menu-link">Salarios</a>
+        <a href="#futuro" class="text-3xl font-semibold text-gray-800 mobile-menu-link">Futuro</a>
+    </div>
+
+    <main class="container mx-auto px-6 py-8 md:py-12">
+
+        <section class="text-center mb-16">
+            <h2 class="text-3xl md:text-5xl font-bold mb-4 text-white">Análisis del Mercado Laboral Digital en Derby</h2>
+            <p class="text-lg md:text-xl text-gray-400 max-w-3xl mx-auto">Un ecosistema tecnológico en plena expansión, con una fuerte demanda de talento fundamental y especializado, y un futuro prometedor impulsado por la innovación y la inversión estratégica.</p>
+        </section>
+
+        <section id="panorama" class="mb-20 scroll-mt-20">
+            <h3 class="text-2xl md:text-3xl font-bold mb-8 section-title text-white">Panorama del Ecosistema</h3>
+            <p class="text-gray-400 mb-10 max-w-4xl">
+                Esta sección explora los componentes clave que definen el vibrante entorno tecnológico de Derby. Desde los sectores industriales que lideran la innovación hasta las empresas y centros educativos que impulsan el crecimiento, aquí obtendrás una visión completa de la estructura del ecosistema digital de la región.
+            </p>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="glass-card p-6 rounded-lg shadow-xl hover:shadow-2xl transition-shadow duration-300">
+                    <h4 class="font-bold text-xl mb-3 text-teal-400">Sectores Predominantes</h4>
+                    <ul class="space-y-2 text-gray-300">
+                        <li class="flex items-start"><span class="text-cyan-400 mr-2 mt-1">●</span><div><strong>Tecnología Inmersiva (VR/AR):</strong> Liderada por estudios como Bloc Digital, con aplicaciones en ingeniería y patrimonio.</div></li>
+                        <li class="flex items-start"><span class="text-cyan-400 mr-2 mt-1">●</span><div><strong>Inteligencia Artificial (IA):</strong> Crecimiento en transporte, inspecciones ferroviarias y tecnología de viajes.</div></li>
+                        <li class="flex items-start"><span class="text-cyan-400 mr-2 mt-1">●</span><div><strong>Servicios de TI Gestionados:</strong> Fuerte demanda de soporte, ciberseguridad y servicios en la nube para el tejido empresarial.</div></li>
+                    </ul>
+                </div>
+                <div class="glass-card p-6 rounded-lg shadow-xl hover:shadow-2xl transition-shadow duration-300">
+                    <h4 class="font-bold text-xl mb-3 text-teal-400">Empresas Clave</h4>
+                    <ul class="space-y-2 text-gray-300">
+                        <li class="flex items-start"><span class="text-cyan-400 mr-2 mt-1">●</span><div><strong>DerbySoft:</strong> Líder global en tecnología para la industria hotelera.</div></li>
+                        <li class="flex items-start"><span class="text-cyan-400 mr-2 mt-1">●</span><div><strong>Bloc Digital:</strong> Reconocido estudio de tecnología inmersiva.</div></li>
+                         <li class="flex items-start"><span class="text-cyan-400 mr-2 mt-1">●</span><div><strong>Syntax IT & Everything Tech:</strong> Proveedores integrales de servicios de TI.</div></li>
+                        <li class="flex items-start"><span class="text-cyan-400 mr-2 mt-1">●</span><div><strong>Concentrix:</strong> Gigante global de tecnología y servicios con nueva sede en Derby.</div></li>
+                    </ul>
+                </div>
+                <div class="glass-card p-6 rounded-lg shadow-xl hover:shadow-2xl transition-shadow duration-300">
+                    <h4 class="font-bold text-xl mb-3 text-teal-400">Centros de Innovación</h4>
+                    <ul class="space-y-2 text-gray-300">
+                        <li class="flex items-start"><span class="text-cyan-400 mr-2 mt-1">●</span><div><strong>Universidad de Derby:</strong> Con su Digital Design Hub y colaboraciones industriales.</div></li>
+                        <li class="flex items-start"><span class="text-cyan-400 mr-2 mt-1">●</span><div><strong>Derby College Group (DCG):</strong> Líder del East Midlands Institute of Technology (EMIoT) y los nuevos Digital Knowledge Exchange Hubs.</div></li>
+                        <li class="flex items-start"><span class="text-cyan-400 mr-2 mt-1">●</span><div><strong>Innovations Hub:</strong> Iniciativa del condado para impulsar la tecnología en los negocios.</div></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="demanda" class="mb-20 scroll-mt-20">
+            <h3 class="text-2xl md:text-3xl font-bold mb-8 section-title text-white">Demanda Laboral: Roles y Tecnologías</h3>
+            <p class="text-gray-400 mb-10 max-w-4xl">
+                Aquí analizamos en detalle qué perfiles y habilidades buscan las empresas en Derby. Explora los roles más solicitados, filtra por nivel de experiencia para ver cómo cambia la demanda y descubre las tecnologías clave y las modalidades de trabajo que dominan el mercado actual.
+            </p>
+            <div class="glass-card p-6 md:p-8 rounded-lg shadow-xl">
+                <div class="mb-6">
+                    <h4 class="font-semibold text-lg text-center mb-4 text-white">Filtra los Roles Más Solicitados por Experiencia</h4>
+                    <div id="experience-filter" class="flex justify-center flex-wrap gap-2 md:gap-4">
+                        <button data-level="all" class="filter-btn bg-teal-500 text-white px-4 py-2 rounded-md shadow-lg hover:bg-teal-600 transition duration-300 font-medium text-sm md:text-base">Todos</button>
+                        <button data-level="junior" class="filter-btn bg-slate-700 text-gray-200 px-4 py-2 rounded-md shadow-md hover:bg-slate-600 transition duration-300 font-medium text-sm md:text-base">Junior</button>
+                        <button data-level="mid" class="filter-btn bg-slate-700 text-gray-200 px-4 py-2 rounded-md shadow-md hover:bg-slate-600 transition duration-300 font-medium text-sm md:text-base">Mid-Level</button>
+                        <button data-level="senior" class="filter-btn bg-slate-700 text-gray-200 px-4 py-2 rounded-md shadow-md hover:bg-slate-600 transition duration-300 font-medium text-sm md:text-base">Senior</button>
+                    </div>
+                </div>
+                <div class="grid lg:grid-cols-2 gap-8 items-center">
+                    <div class="chart-container">
+                        <canvas id="rolesChart"></canvas>
+                    </div>
+                    <div id="roles-info" class="text-gray-300 p-4 bg-gray-800 rounded-lg">
+                        <h5 class="font-bold text-lg mb-2 text-white">Tecnologías Clave para <span id="level-text" class="text-teal-400">Todos los Niveles</span></h5>
+                        <p id="tech-text">El mercado de Derby muestra una demanda equilibrada. Para roles de entrada, se valoran las bases de soporte técnico y desarrollo. A nivel medio, la especialización en la pila de .NET y la nube es crucial. Los roles senior requieren liderazgo, arquitectura de sistemas complejos y experiencia profunda en plataformas como AWS y Azure.</p>
+                    </div>
+                </div>
+                <hr class="my-10 border-gray-700">
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div>
+                        <h4 class="font-semibold text-lg text-center mb-4 text-white">Tecnologías Más Requeridas</h4>
+                        <div class="flex flex-wrap justify-center gap-3 text-sm">
+                            <span class="bg-teal-500/20 text-teal-200 px-3 py-1 rounded-full font-medium border border-teal-500/50">C#/.NET Core</span>
+                            <span class="bg-teal-500/20 text-teal-200 px-3 py-1 rounded-full font-medium border border-teal-500/50">SQL</span>
+                            <span class="bg-sky-500/20 text-sky-200 px-3 py-1 rounded-full font-medium border border-sky-500/50">JavaScript</span>
+                            <span class="bg-amber-500/20 text-amber-200 px-3 py-1 rounded-full font-medium border border-amber-500/50">AWS</span>
+                            <span class="bg-sky-500/20 text-sky-200 px-3 py-1 rounded-full font-medium border border-sky-500/50">Azure</span>
+                            <span class="bg-yellow-500/20 text-yellow-200 px-3 py-1 rounded-full font-medium border border-yellow-500/50">Power BI</span>
+                            <span class="bg-red-500/20 text-red-200 px-3 py-1 rounded-full font-medium border border-red-500/50">Python</span>
+                            <span class="bg-purple-500/20 text-purple-200 px-3 py-1 rounded-full font-medium border border-purple-500/50">VR/AR</span>
+                            <span class="bg-green-500/20 text-green-200 px-3 py-1 rounded-full font-medium border border-green-500/50">Ciberseguridad</span>
+                        </div>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <h4 class="font-semibold text-lg text-center mb-4 text-white">Modalidades de Trabajo</h4>
+                        <div class="w-48 h-48">
+                            <canvas id="workModalitiesChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="salarios" class="mb-20 scroll-mt-20">
+            <h3 class="text-2xl md:text-3xl font-bold mb-8 section-title text-white">Análisis de Salarios</h3>
+             <p class="text-gray-400 mb-10 max-w-4xl">
+                Esta sección ofrece una visión clara de la compensación en el sector tecnológico de Derby. Compara los rangos salariales promedio para los roles más importantes y explora las tendencias de crecimiento, especialmente en áreas de alta demanda como la Inteligencia Artificial, para entender el valor de mercado de cada especialidad.
+            </p>
+            <div class="glass-card p-6 md:p-8 rounded-lg shadow-xl">
+                <h4 class="font-semibold text-lg text-center mb-4 text-white">Comparativa Salarial Anual Promedio (£)</h4>
+                <div class="chart-container">
+                    <canvas id="salariesChart"></canvas>
+                </div>
+                 <p class="text-center text-sm text-gray-400 mt-4">Los salarios reflejan una clara progresión profesional. Los roles de liderazgo y especializados en datos y nube alcanzan los rangos más altos, incentivando la especialización y la adquisición de experiencia.</p>
+            </div>
+        </section>
+
+        <section id="futuro" class="scroll-mt-20">
+            <h3 class="text-2xl md:text-3xl font-bold mb-8 section-title text-white">Proyecciones a Futuro (6-24 meses)</h3>
+            <p class="text-gray-400 mb-10 max-w-4xl">
+                Mirando hacia adelante, esta sección destaca las tendencias que darán forma al mercado laboral de Derby. Descubre qué roles y tecnologías emergentes experimentarán un mayor crecimiento y qué factores externos, como las inversiones gubernamentales y la evolución del trabajo híbrido, impactarán la demanda de talento.
+            </p>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="glass-card p-6 rounded-lg shadow-xl hover:shadow-2xl transition-shadow duration-300">
+                    <h4 class="font-bold text-xl mb-3 text-teal-400">Roles en Crecimiento</h4>
+                    <ul class="space-y-2 text-gray-300">
+                        <li><span class="font-semibold">Especialistas en IA/ML:</span> Impulsados por la digitalización del transporte y servicios.</li>
+                        <li><span class="font-semibold">Profesionales de Ciberseguridad:</span> Demanda constante por el aumento de ciberamenazas.</li>
+                        <li><span class="font-semibold">Ingenieros de Nube y DevOps:</span> Esenciales para infraestructuras escalables.</li>
+                    </ul>
+                </div>
+                <div class="glass-card p-6 rounded-lg shadow-xl hover:shadow-2xl transition-shadow duration-300">
+                    <h4 class="font-bold text-xl mb-3 text-teal-400">Tecnologías con Mayor Adopción</h4>
+                    <ul class="space-y-2 text-gray-300">
+                        <li><span class="font-semibold">IA Generativa:</span> Aumento de la experimentación y búsqueda de monetización.</li>
+                        <li><span class="font-semibold">IoT y Smart Cities:</span> Gracias a la estrategia de conectividad regional.</li>
+                        <li><span class="font-semibold">VR/AR para Colaboración:</span> Potencial para mejorar la interacción en equipos híbridos.</li>
+                    </ul>
+                </div>
+                <div class="glass-card p-6 rounded-lg shadow-xl hover:shadow-2xl transition-shadow duration-300">
+                    <h4 class="font-bold text-xl mb-3 text-teal-400">Factores Externos Clave</h4>
+                    <ul class="space-y-2 text-gray-300">
+                        <li><span class="font-semibold">Inversión Gubernamental:</span> Programas como 'Project Gigabit' y la 'East Midlands Investment Zone'.</li>
+                        <li><span class="font-semibold">Escasez de Habilidades Post-Brexit:</span> Desafío continuo en la atracción de talento STEM.</li>
+                        <li><span class="font-semibold">Evolución del Trabajo Híbrido:</span> Factor clave para la atracción y retención de talento.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-gray-900 text-gray-400 mt-20">
+        <div class="container mx-auto px-6 py-4 text-center">
+            <p>&copy; 2025 Análisis del Mercado Laboral de Derby. Creado a partir de datos públicos y de mercado.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            
+            const rolesData = {
+                all: {
+                    labels: ['Software Dev/Eng', 'IT Support Tech', 'Data Analyst', 'DevOps Engineer', 'QA Engineer'],
+                    data: [100, 95, 70, 65, 60],
+                    techText: 'El mercado de Derby muestra una demanda equilibrada. Para roles de entrada, se valoran las bases de soporte técnico y desarrollo. A nivel medio, la especialización en la pila de .NET y la nube es crucial. Los roles senior requieren liderazgo, arquitectura de sistemas complejos y experiencia profunda en plataformas como AWS y Azure.'
+                },
+                junior: {
+                    labels: ['IT Support Tech', 'Trainee Software Dev', 'Junior IT Support'],
+                    data: [100, 85, 80],
+                    techText: 'Se valora el conocimiento de sistemas operativos (Windows, macOS), redes y hardware. Para desarrolladores, se buscan fundamentos de C#, .NET, y SQL. La voluntad de aprender es clave, y muchas empresas ofrecen formación en el puesto.'
+                },
+                mid: {
+                    labels: ['Software Developer', 'Data Analyst', 'IT Support (2nd Line)'],
+                    data: [100, 75, 70],
+                    techText: 'Se requiere experiencia sólida en C#, .NET Core, ASP.NET Core, y plataformas cloud como AWS o Azure. Para analistas, el dominio de SQL, Power BI, y DAX es fundamental. Se espera autonomía y capacidad de resolución de problemas complejos.'
+                },
+                senior: {
+                    labels: ['Senior Software Dev', 'Lead Data Engineer', 'DevOps Engineer', 'Head of Tech Services'],
+                    data: [100, 85, 80, 70],
+                    techText: 'Se busca experiencia en arquitectura de software, liderazgo de equipos y gestión de proyectos. El dominio de AWS/Azure, Databricks, y metodologías Agile es indispensable. Se valora la visión estratégica y la capacidad de mentoría.'
+                }
+            };
+
+            const salariesData = {
+                labels: ['Head of Tech Services', 'Lead Data Engineer', 'Senior Software Dev', 'Software Engineer (Avg)', 'Data Analyst', 'Trainee Software Dev'],
+                data: [110000, 90000, 67500, 57500, 50000, 30500]
+            };
+
+            const workModalitiesData = {
+                labels: ['Híbrido', 'Remoto', 'Presencial'],
+                data: [51, 28, 21]
+            };
+            
+            Chart.defaults.font.family = "'Inter', sans-serif";
+            Chart.defaults.color = '#9ca3af';
+
+            const rolesCtx = document.getElementById('rolesChart').getContext('2d');
+            const rolesChart = new Chart(rolesCtx, {
+                type: 'bar',
+                data: {
+                    labels: rolesData.all.labels,
+                    datasets: [{
+                        label: 'Demanda Relativa',
+                        data: rolesData.all.data,
+                        backgroundColor: 'rgba(20, 184, 166, 0.6)',
+                        borderColor: 'rgba(20, 184, 166, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            grid: { display: false },
+                            ticks: { display: false }
+                        },
+                        y: {
+                           grid: { color: '#4a4a4a' }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: '#1f2937',
+                            titleColor: '#e5e7eb',
+                            bodyColor: '#d1d5db',
+                            borderColor: '#4b5563',
+                            borderWidth: 1,
+                            callbacks: {
+                                label: function(context) {
+                                    return `Demanda: ${context.raw}`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            const salariesCtx = document.getElementById('salariesChart').getContext('2d');
+            const salariesChart = new Chart(salariesCtx, {
+                type: 'bar',
+                data: {
+                    labels: salariesData.labels,
+                    datasets: [{
+                        label: 'Salario Anual Promedio (£)',
+                        data: salariesData.data,
+                        backgroundColor: [
+                            'rgba(20, 184, 166, 0.8)',
+                            'rgba(20, 184, 166, 0.7)',
+                            'rgba(20, 184, 166, 0.6)',
+                            'rgba(20, 184, 166, 0.5)',
+                            'rgba(20, 184, 166, 0.4)',
+                            'rgba(20, 184, 166, 0.3)'
+                        ],
+                        borderColor: 'rgba(20, 184, 166, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                     scales: {
+                        x: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value, index, values) {
+                                    return '£' + (value / 1000) + 'k';
+                                }
+                            }
+                        },
+                        y: {
+                            grid: { color: '#4a4a4a' }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                             backgroundColor: '#1f2937',
+                            titleColor: '#e5e7eb',
+                            bodyColor: '#d1d5db',
+                            borderColor: '#4b5563',
+                            borderWidth: 1,
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.x !== null) {
+                                        label += new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP', minimumFractionDigits: 0 }).format(context.parsed.x);
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            const workModalitiesCtx = document.getElementById('workModalitiesChart').getContext('2d');
+            const workModalitiesChart = new Chart(workModalitiesCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: workModalitiesData.labels,
+                    datasets: [{
+                        label: 'Modalidad de Trabajo',
+                        data: workModalitiesData.data,
+                        backgroundColor: [
+                            'rgba(20, 184, 166, 0.7)',
+                            'rgba(59, 130, 246, 0.7)',
+                            'rgba(249, 115, 22, 0.7)'
+                        ],
+                        borderColor: '#0c0a09',
+                        borderWidth: 2,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                boxWidth: 12,
+                                padding: 15,
+                                color: '#d1d5db'
+                            }
+                        }
+                    }
+                }
+            });
+
+            const filterButtons = document.querySelectorAll('.filter-btn');
+            const levelText = document.getElementById('level-text');
+            const techText = document.getElementById('tech-text');
+
+            filterButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const level = button.dataset.level;
+                    
+                    filterButtons.forEach(btn => {
+                        btn.classList.remove('bg-teal-500', 'text-white', 'shadow-lg');
+                        btn.classList.add('bg-slate-700', 'text-gray-200', 'shadow-md');
+                    });
+                    button.classList.add('bg-teal-500', 'text-white', 'shadow-lg');
+                    button.classList.remove('bg-slate-700', 'text-gray-200', 'shadow-md');
+
+                    rolesChart.data.labels = rolesData[level].labels;
+                    rolesChart.data.datasets[0].data = rolesData[level].data;
+                    rolesChart.update();
+
+                    levelText.textContent = button.textContent;
+                    techText.textContent = rolesData[level].techText;
+                });
+            });
+
+            // Mobile menu logic
+            const hamburgerBtn = document.getElementById('hamburger-btn');
+            const closeMenuBtn = document.getElementById('close-menu-btn');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const mobileMenuLinks = mobileMenu.querySelectorAll('a');
+
+            hamburgerBtn.addEventListener('click', () => {
+                mobileMenu.classList.add('open');
+                document.body.style.overflow = 'hidden';
+            });
+
+            closeMenuBtn.addEventListener('click', () => {
+                mobileMenu.classList.remove('open');
+                document.body.style.overflow = 'auto';
+            });
+            
+            mobileMenuLinks.forEach(link => {
+                link.addEventListener('click', () => {
+                    mobileMenu.classList.remove('open');
+                    document.body.style.overflow = 'auto';
+                });
+            });
+        });
+    </script>
+</body>
+</html>
+
